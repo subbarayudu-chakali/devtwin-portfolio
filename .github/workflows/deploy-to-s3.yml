@@ -24,10 +24,21 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to S3
+      - name: Install AWS CLI
         run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          sudo apt-get install -y awscli
+        if: runner.os == 'Linux'
+
+      - name: Install AWS CLI
+        run: |
+          choco install awscli
+        if: runner.os == 'Windows'
+
+      - name: Configure AWS CLI
+        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set region your-region
+
+      - name: Deploy to S3
+        run:
           aws s3 sync build/ s3://devtwin-portfolio
 
   # Add more steps if needed, such as testing or notifications.
